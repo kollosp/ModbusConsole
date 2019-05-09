@@ -103,7 +103,7 @@ app.post('/read', (req, res) => {
 app.post('/write', (req, res) => {
 
 	write(req.data.start, req.data.data, () => {	
-		read(req.data.start, req.data.data.length, (data) => {
+		read(req.body.start, req.body.data.length, (data) => {
 			res.send(data)	
 		})
 	})
