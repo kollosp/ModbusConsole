@@ -88,6 +88,13 @@ const read = function(start, dataCount, callback, maxFrameLen = 12) {
 
 const write = function(start, data, callback) {
 	initModbus('/dev/ttyUSB0', 1, 9600, 'none', (client) => {
+
+		
+		for(let k in data)
+			if(typeof data[k] ==  "string")
+				data[k] = parseInt(data[k])
+
+		console.log(data)
 		client.writeRegisters(start, data)
         .then(callback())
         .catch((e) => console.error(e))		
@@ -102,7 +109,7 @@ app.post('/read', (req, res) => {
 
 app.post('/write', (req, res) => {
 
-	write(req.data.start, req.data.data, () => {	
+	write(req.body.start, req.body.data, () => {	
 		read(req.body.start, req.body.data.length, (data) => {
 			res.send(data)	
 		})
