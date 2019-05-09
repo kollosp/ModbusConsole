@@ -1,0 +1,28 @@
+{
+  "name": "32-modbusconsole",
+  "version": "1.0.0",
+  "description": "modbus console provide reading and writing data to remote MODBUSRTU device. Controlled by web application",
+  "main": "app.js",
+  "scripts": {
+    "test": "node test.js",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/kollosp/32-modbusconsole.git"
+  },
+  "author": "Paweł Parczyk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/kollosp/32-modbusconsole/issues"
+  },
+  "homepage": "https://gitlab.com/kollosp/32-modbusconsole#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.19.0",
+    "bulma": "^0.7.4",
+    "express": "~4.16.0",
+    "modbus-serial": "^7.5.1",
+    "vue": "^2.6.10"
+  }
+}
