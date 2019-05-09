@@ -37,7 +37,8 @@ const readArrayOfQuestions = function(client, questions, ret, callback, i=0){
 
 	client.readHoldingRegisters(questions[i].start, questions[i].dataCount)
 		.then((d) => {
-			for(let k of d)
+			
+			for(let k of d.data)
 				ret.push(k)
 			readArrayOfQuestions(client, questions, ret, callback, ++i)
 		})
