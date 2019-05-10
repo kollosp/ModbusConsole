@@ -94,9 +94,13 @@ const write = function(start, data, callback) {
 			if(typeof data[k] ==  "string")
 				data[k] = parseInt(data[k])
 
-		console.log(data)
+		//console.log(data)
 		client.writeRegisters(start, data)
-        .then(callback())
+		//client.writeRegisters(0x1307, [0xffff])
+        .then((d) => {
+		console.log("written:", d)
+		callback()
+	})
         .catch((e) => console.error(e))		
 	})
 }
@@ -109,7 +113,8 @@ app.post('/read', (req, res) => {
 
 app.post('/write', (req, res) => {
 
-	write(req.body.start, req.body.data, () => {	
+	write(req.body.start, req.body.data, () => {
+		console.log("reading after writing:", req.body.data.length) 
 		read(req.body.start, req.body.data.length, (data) => {
 			res.send(data)	
 		})
