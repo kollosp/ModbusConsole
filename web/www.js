@@ -94,13 +94,21 @@ const write = function(start, data, callback) {
 			if(typeof data[k] ==  "string")
 				data[k] = parseInt(data[k])
 
+		let prom
 		//console.log(data)
-		client.writeRegisters(start, data)
-		//client.writeRegisters(0x1307, [0xffff])
-        .then((d) => {
-		console.log("written:", d)
-		callback()
-	})
+		if(data.length == 1){
+			//use modbus function 6 (write register)
+			prom = client.writeRegister(start, data[0])
+		}
+		else{
+			//use modbus function 16 (write multiple registers)
+			prom = client.writeRegisters(start, data)
+		}
+	
+	    prom.then((d) => {
+			console.log("written:", d)
+			callback()
+		})
         .catch((e) => console.error(e))		
 	})
 }

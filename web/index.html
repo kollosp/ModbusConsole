@@ -5,159 +5,160 @@
 	<link rel="stylesheet" href="public/bulma.min.css">
 	
 </head>
-<body>
+<body  class="has-background-white-bis" style="padding-top: 1rem">
+<div class="wrapper container">
+	<div  id="modbus" class="tile is-ancestor is-vertical">
+		<div class="tile">
 
-<div id="modbus" class="tile is-ancestor is-vertical">
-	<div class="tile">
+			<div class="tile is-parent">
+				<div class="tile is-child">
+					<div class="box">
+						<h1 class="title"> Konfiguracja </h1>
 
-		<div class="tile is-parent">
-			<div class="tile is-child">
-				<div class="box">
-					<h1 class="title"> Konfiguracja </h1>
+						<div class="field">
+							<label class="label">Adres urzadzenia</label>
+							<div class="control">
+								<input class="input" type="text" placeholder="Wrowadz adres poczatkowy" v-model="dev.address">
+							</div>
+						</div>
+						<div class="field">
+							<label class="label">Szybkosc</label>
+							<div class="control">
+								<input class="input" type="text" placeholder="Wrowadz adres poczatkowy" v-model="dev.bitrate">
+							</div>
+						</div>
+						<div class="field">
+							<label class="label">Bity danych</label>
+							<div class="select">
+								<select v-model="dev.data">
+									<option>8</option>
+									<option>7</option>
+									<option>6</option>
+									<option>5</option>
+								</select>
+							</div>
+						</div>
+						<div class="field">
+							<label class="label">Kontrola parzystosci</label>
+							<div class="select">
+								<select v-model="dev.parity">
+									<option>none</option>
+									<option>even</option>
+									<option>odd</option>
+								</select>
+							</div>
+						</div>
+						<div class="field">
+							<label class="label">Bity stopu</label>
+							<div class="select">
+								<select v-model="dev.stopBits">
+									<option>1</option>
+									<option>2</option>
+								</select>
+							</div>
+						</div>
 
-					<div class="field">
-						<label class="label">Adres urzadzenia</label>
 						<div class="control">
-							<input class="input" type="text" placeholder="Wrowadz adres poczatkowy" v-model="dev.address">
+							<button class="button is-link" v-on:click="update">Wyslij</button>
 						</div>
 					</div>
-					<div class="field">
-						<label class="label">Szybkosc</label>
-						<div class="control">
-							<input class="input" type="text" placeholder="Wrowadz adres poczatkowy" v-model="dev.bitrate">
-						</div>
-					</div>
-					<div class="field">
-						<label class="label">Bity danych</label>
-						<div class="select">
-							<select v-model="dev.data">
-								<option>8</option>
-								<option>7</option>
-								<option>6</option>
-								<option>5</option>
-							</select>
-						</div>
-					</div>
-					<div class="field">
-						<label class="label">Kontrola parzystosci</label>
-						<div class="select">
-							<select v-model="dev.parity">
-								<option>none</option>
-								<option>even</option>
-								<option>odd</option>
-							</select>
-						</div>
-					</div>
-					<div class="field">
-						<label class="label">Bity stopu</label>
-						<div class="select">
-							<select v-model="dev.stopBits">
-								<option>1</option>
-								<option>2</option>
-							</select>
+				</div><!--child -->
+			</div> <!--parent -->
+
+			<div class="tile is-parent">
+				<div class="tile is-child box">
+
+					<div class="tile is-parent">
+						<div class="tile is-child">
+							<h1 class="title"> Rozkazy </h1>
+							<hr>
 						</div>
 					</div>
 
-					<div class="control">
-						<button class="button is-link" v-on:click="update">Wyslij</button>
-					</div>
-				</div>
-			</div><!--child -->
-		</div> <!--parent -->
+					<div class="tile ">
+						<div class="tile is-parent">
+							<div class="tile is-child box">
+								<h1 class="subtitle"> Read </h1>
+								<div class="field">
+									<label class="label">
+										Adres poczatkowy
+										[<span class="has-text-link">{{displayHex(order.read.startAdd)}}</span>]
+										<span class="has-text-success">FC3</span>
+									</label>
+									<div class="control">
+										<input class="input" type="text" placeholder="Wrowadz adres poczatkowy" v-model="order.read.startAdd">
+									</div>
+								</div>
 
+								<div class="field">
+									<label class="label">
+										Ilosc bytow
+										[<span class="has-text-link">{{displayHex(order.read.dataCount)}}</span>]
+									</label>
+									<div class="control">
+										<input class="input" type="text" placeholder="Wpowadz ilosc bytow" v-model="order.read.dataCount">
+										
+									</div>
+								</div>
+								
+								<div class="control">
+									<button class="button is-link" v-on:click="read">Wyslij</button>
+								</div>
+							</div>
+						</div>
+
+						<div class="tile is-parent">
+							<div class="tile is-child box">
+								
+								<h1 class="subtitle"> Write </h1>
+								<div class="field">
+									<label class="label">
+										Adres poczatkowy
+										[<span class="has-text-link">{{displayHex(order.write.startAdd)}}</span>] <span class="has-text-success">{{funcionCode}}</span>
+									</label>
+									<div class="control">
+										<input class="input" type="text" placeholder="Wrowadz adres poczatkowy" v-model="order.write.startAdd">
+										
+									</div>
+								</div>
+
+								<div class="field">
+									<label class="label">
+										Wartosc/Wartosci
+									</label>
+									<div class="control">
+										<input class="input" type="text" placeholder="Wpowadz wartosci" v-model="order.write.data">
+									</div>
+								</div>
+								
+								<div class="control">
+									<button class="button is-link" v-on:click="write">Wyslij</button>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+				</div> <!--child -->
+			</div> <!--parent -->
+		</div> <!--tile-->
 		<div class="tile is-parent">
 			<div class="tile is-child box">
+				<table class="table">
+					<tr>
+						<th></th>
+						<th v-for="n in 16">0x{{(n-1).toString(16)}}</th>
+					</tr>
+					<tr v-for="(item, i) in modbusData">
+						<th>0x{{item.start.toString(16)}}</th>
+						<td v-for="(cell, j) in modbusData[i].d" v-bind:class="{ 'has-background-success' : modbusData[i].s[j] }">{{modbusData[i].d[j]}} [<span class="has-text-link has-text-weight-bold">0x{{modbusData[i].d[j].toString(16)}}</span>]</td>
+					</tr>
 
-				<div class="tile is-parent">
-					<div class="tile is-child">
-						<h1 class="title"> Rozkazy </h1>
-						<hr>
-					</div>
-				</div>
-
-				<div class="tile ">
-					<div class="tile is-parent">
-						<div class="tile is-child box">
-							<h1 class="subtitle"> Read </h1>
-							<div class="field">
-								<label class="label">
-									Adres poczatkowy
-									[<span class="has-text-link">{{displayHex(order.read.startAdd)}}</span>]
-								</label>
-								<div class="control">
-									<input class="input" type="text" placeholder="Wrowadz adres poczatkowy" v-model="order.read.startAdd">
-								</div>
-							</div>
-
-							<div class="field">
-								<label class="label">
-									Ilosc bytow
-									[<span class="has-text-link">{{displayHex(order.read.dataCount)}}</span>]
-								</label>
-								<div class="control">
-									<input class="input" type="text" placeholder="Wpowadz ilosc bytow" v-model="order.read.dataCount">
-									
-								</div>
-							</div>
-							
-							<div class="control">
-								<button class="button is-link" v-on:click="read">Wyslij</button>
-							</div>
-						</div>
-					</div>
-
-					<div class="tile is-parent">
-						<div class="tile is-child box">
-							
-							<h1 class="subtitle"> Write </h1>
-							<div class="field">
-								<label class="label">
-									Adres poczatkowy
-									[<span class="has-text-link">{{displayHex(order.write.startAdd)}}</span>]
-								</label>
-								<div class="control">
-									<input class="input" type="text" placeholder="Wrowadz adres poczatkowy" v-model="order.write.startAdd">
-									
-								</div>
-							</div>
-
-							<div class="field">
-								<label class="label">
-									Wartosc/Wartosci
-								</label>
-								<div class="control">
-									<input class="input" type="text" placeholder="Wpowadz wartosci" v-model="order.write.data">
-								</div>
-							</div>
-							
-							<div class="control">
-								<button class="button is-link" v-on:click="write">Wyslij</button>
-							</div>
-
-						</div>
-					</div>
-				</div>
-
-			</div> <!--child -->
-		</div> <!--parent -->
-	</div> <!--tile-->
-	<div class="tile is-parent">
-		<div class="tile is-child box">
-			<table class="table">
-				<tr>
-					<th></th>
-					<th v-for="n in 16">0x{{(n-1).toString(16)}}</th>
-				</tr>
-				<tr v-for="(item, i) in modbusData">
-					<th>0x{{item.start.toString(16)}}</th>
-					<td v-for="(cell, j) in modbusData[i].d">{{modbusData[i].d[j]}} [<span class="has-text-link has-text-weight-bold">0x{{modbusData[i].d[j].toString(16)}}</span>]</td>
-				</tr>
-
-			</table>
-		</div> <!--child-->
-	</div> <!--parent-->
-</div> <!--ancestor -->
-
+				</table>
+			</div> <!--child-->
+		</div> <!--parent-->
+	</div> <!--ancestor -->
+</div>
 </body>
 </html>
 
