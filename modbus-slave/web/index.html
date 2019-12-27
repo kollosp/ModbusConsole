@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MODBUS RTU CONSOLE | elmecosolar.pl</title>
+	<link rel="stylesheet" href="public/bulma.min.css">
+	<link rel="stylesheet" href="index.css">
+	
+</head>
+<body  class="has-background-white-bis" style="padding-top: 1rem">
+<div class="wrapper container">
+	<div  id="modbus" class="tile is-ancestor is-vertical">
+		<div class="tile is-parent">
+			<div class="tile is-child box">
+
+				<div class="field">
+					<label class="label">Zmien status serwera [{{status ? "Włączony" : "Wyłączony"}}]</label>
+					<p class="help">Wyłączony nie odpowiada na przychodzace zapytania</p>
+				</div>
+				<div class="field is-grouped">
+					<p class="control">
+						<a class="button is-primary" :disabled="status" v-on:click="start()">
+							Włącz
+						</a>
+					</p>
+					<p class="control">
+						<a class="button is-light" :disabled="!status" v-on:click="stop()">
+							Wyłącz
+						</a>
+					</p>
+				</div>
+
+				<table class="table">
+					<tr>
+						<th>Adres</th>
+						<th>Min</th>
+						<th>Wartość</th>
+						<th>Max</th>
+					</tr>
+					<template v-for="(i, key) in modbusData">
+						<tr>
+							<td rowspan="2">{{key}}</td>
+							<td rowspan="2" v-html="format(i.min)"></td>
+							<td v-html="format(i.value, ' ')"></td>
+							<td rowspan="2" v-html="format(i.max)"></td>
+						</tr>
+						<tr>
+							<td><input v-on:change="sliderChanged(key)" v-model="i.value" type="range"
+									   v-bind:min="i.min" v-bind:max="i.max" class="slider" v-bind:id="'slider' + key"></td>
+						</tr>
+					</template>
+				</table>
+			</div> <!--child-->
+		</div> <!--parent-->
+	</div> <!--ancestor -->
+</div>
+</body>
+</html>
+
+<script type="text/javascript" src="public/vue.js"></script>
+<script type="text/javascript" src="public/axios.min.js"></script>
+<script type="text/javascript" src="index.js"></script>
