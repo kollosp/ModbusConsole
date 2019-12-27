@@ -42,6 +42,16 @@ var modbus = new Vue({
 			}).catch(e => console.error(e))
 		},
 
+		inputChanged: function(key) {
+			text = document.getElementById('input' + key).value
+			console.log(text)
+			let value = parseInt(text)
+			let m = this.modbusData[key]
+			if(value >= m.min && value <= m.max) {
+				this.modbusData[key].value = value
+			}
+		},
+
 		sliderChanged: function(key) {
 			let m = this.modbusData[key]
 			console.log(key, m)

@@ -35,6 +35,7 @@
 						<th>Min</th>
 						<th>Wartość</th>
 						<th>Max</th>
+						<th>Wprowadź wartość</th>
 					</tr>
 					<template v-for="(i, key) in modbusData">
 						<tr>
@@ -42,6 +43,10 @@
 							<td rowspan="2" v-html="format(i.min)"></td>
 							<td v-html="format(i.value, ' ')"></td>
 							<td rowspan="2" v-html="format(i.max)"></td>
+							<td rowspan="2">
+								<input type="text" v-bind:id="'input' + key" v-on:keyup.enter="inputChanged(key)"><br>
+								<input type="button" v-on:click="inputChanged(key)" value="Wprowadz">
+							</td>
 						</tr>
 						<tr>
 							<td><input v-on:change="sliderChanged(key)" v-model="i.value" type="range"
