@@ -44,11 +44,17 @@ var modbus = new Vue({
 
 		inputChanged: function(key) {
 			text = document.getElementById('input' + key).value
-			console.log(text)
 			let value = parseInt(text)
 			let m = this.modbusData[key]
 			if(value >= m.min && value <= m.max) {
 				this.modbusData[key].value = value
+
+				axios.post('/update',{
+					key: key,
+					value: parseInt(m.value),
+					max: parseInt(m.max),
+					min: parseInt(m.min)
+				}).then(m => this.modbusData[key] = m.data).catch(e => console.error(e))
 			}
 		},
 
