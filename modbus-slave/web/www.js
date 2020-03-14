@@ -4,12 +4,12 @@ const ModbusRTU = require("modbus-serial")
 const Serial = require("serialport")
 const app = express()
 const path = require('path');
-const port = 3000
+const port = 3100
 
 const protocol = require('./protocol')
 const fs = require('fs')
 
-module.exports = (serialConfig, database) => {
+module.exports = function (serialConfig, database) {
 
 
 	//if enable then server will be sending responses
@@ -35,35 +35,77 @@ module.exports = (serialConfig, database) => {
 		//create on data event handler
 		const onData = function (data) {
 
-			data = protocol.parse(data)
-			console.log(data)
-			console.log(" # Server received: ", data)
+			console.log(" # data received (raw):", data.toString('hex'))
+
+			try {
+				data = protocol.parse(data)
+			}catch(e) {
+				console.error(e)
+				return
+			}
+
+			console.log(" # Server received (parsed):", data)
 
 			if(enable == false) {
 				console.log(" # Server is disabled, no response will be send")
 				return
 			}
 
-            database.changed = false
+			switch (data.functionCode) {
+				case 3: response0x3(data); break;
+				case 0x10: response0x10(data); break;
+			}
+
+
+		}
+
+		const response0x10 = function(data) {
+			database.changed = false
+			let response = []
+			for(let i=0;i<data.values.length;++i){
+				let key = 'v' + (parseInt(i)+data.address).toString(16)
+				if(database.data[key] != data.values[i]) {
+					database.changed = true
+					database.data[key] = {value: data.values[i], max: 0xffff, min: 0}
+				}
+
+			}
+
+			response.push(data.address)
+			response.push(data.registers)
+
+			data = protocol.build(data.device, data.functionCode, response)
+			console.log("response:", data.toString('hex'))
+			server.write(data)
+
+			dbSave()
+		}
+
+		const response0x3 = function(data) {
+			database.changed = false
 			let response = []
 			for(let i=0;i<data.count;++i){
-			    let key = 'v' + (parseInt(i)+data.address).toString(16)
+				let key = 'v' + (parseInt(i)+data.address).toString(16)
 				if(database.data[key] == undefined) {
-                    database.changed = true
-				    database.data[key] = {value: 0, max: 0xffff, min: 0}
-                }
+					database.changed = true
+					database.data[key] = {value: 0, max: 0xffff, min: 0}
+				}
 
-                response.push(database.data[key].value)
+				response.push(database.data[key].value)
 			}
 
 			data = protocol.build(data.device, data.functionCode, response)
 			console.log("response:", data.toString('hex'))
 
 			server.write(data)
-            if(database.changed){
-            	console.log("saving")
-                fs.writeFileSync(database.path, JSON.stringify(database.data, null, 4))
-            }
+			dbSave()
+		}
+
+		const dbSave = function(){
+			if(database.changed){
+				console.log("saving")
+				fs.writeFileSync(database.path, JSON.stringify(database.data, null, 4))
+			}
 		}
 
 		const onError = function (e) {

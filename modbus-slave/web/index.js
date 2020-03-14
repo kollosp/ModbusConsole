@@ -76,6 +76,8 @@ var modbus = new Vue({
 
 	mounted: function(){
 		this.load()
+		let self = this
+		setInterval(() => self.load(), 1000)
 		this.loadStatus()
 	}
 })

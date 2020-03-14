@@ -29,6 +29,7 @@ let protocol = {
         switch (functionCode) {
             case 3: return protocol.build0x3(device, data)
             case 6: return protocol.build0x6(device, data)
+            case 0x10: return protocol.build0x10(device, data)
             default: throw(Error("Modbus protocol syntax: Unknown function " + func))
         }
     },
@@ -40,6 +41,20 @@ let protocol = {
      * @returns {buffer}
      */
     build0x6: function(device, data) { return Buffer.alloc(10) },
+
+    build0x10: function(device, data) {
+        let buffer = Buffer.alloc(8)
+        let offset = 0
+        offset = buffer.writeUInt8(device, offset)
+        offset = buffer.writeUInt8(0x10, offset)
+
+        //address and register count
+        for(let i in data)
+            offset = buffer.writeUInt16BE(data[i], offset)
+
+        buffer.writeUInt16LE(protocol.crc16(buffer.slice(0, -2),buffer.length - 2), offset)
+        return buffer
+    },
 
     /**
      * Function builds 0x3 modbus response frame
@@ -72,6 +87,7 @@ let protocol = {
         switch(func) {
             case 3: d = protocol.parse0x3(buffer); break
             case 6: d = protocol.parse0x6(buffer); break
+            case 0x10: d = protocol.parse0x10(buffer); break
             default: throw(Error("Modbus protocol syntax: Unknown function " + func))
         }
 
@@ -89,6 +105,23 @@ let protocol = {
 
     parse0x6: function (buffer) {
 
+    },
+
+    parse0x10: function (buffer) {
+        let address = buffer[2]*0x100 + buffer[3]
+        let registers = buffer[4]*0x100 + buffer[5]
+        let bytes = buffer[6]
+        let values = []
+
+        for(let i=7;i<buffer.length-2;i+=2)
+            values.push(buffer[i]*0x100 + buffer[i+1])
+
+        return {
+            address: address,
+            registers: registers,
+            bytes: bytes,
+            values: values
+        }
     }
 }
 
