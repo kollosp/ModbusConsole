@@ -2,7 +2,8 @@ var modbus = new Vue({
 	el: '#modbus',
 	data: {
 		status: true, //server is disable or enable
-		modbusData: {}
+		modbusData: {},
+		busy: false
 	},
 
 	methods:{
@@ -14,6 +15,7 @@ var modbus = new Vue({
 			let self = this
 			axios.post('/load').then(m => {
 				self.modbusData = m.data
+				self.busy = false
 			}).catch(e => console.error(e))
 		},
 
@@ -77,7 +79,12 @@ var modbus = new Vue({
 	mounted: function(){
 		this.load()
 		let self = this
-		setInterval(() => self.load(), 1000)
+		setInterval(() => {
+			if(self.busy == false){
+				self.busy = true
+				self.load()
+			}
+		}, 100)
 		this.loadStatus()
 	}
 })
