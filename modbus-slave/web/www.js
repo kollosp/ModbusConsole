@@ -9,7 +9,11 @@ const port = 3100
 const protocol = require('./protocol')
 const fs = require('fs')
 
-module.exports = function (serialConfig, database) {
+let FgRed = "\x1b[31m"
+let FgBlue = "\x1b[34m"
+let Reset = "\x1b[0m"
+
+module.exports = function (modbusDevice, serialConfig, database) {
 
 
 	//if enable then server will be sending responses
@@ -40,11 +44,16 @@ module.exports = function (serialConfig, database) {
 			try {
 				data = protocol.parse(data)
 			}catch(e) {
-				console.error(e)
+				console.error(`${FgRed}${e.message}${Reset}`)
 				return
 			}
 
-			console.log(" # Server received (parsed):", data)
+			if(data.device != modbusDevice){
+				console.log(" # Server received data to other device: " + data.device + " modbusDevice value is: " + modbusDevice)
+				return
+			}
+
+			console.log(FgBlue + " # Server received (parsed):", JSON.stringify(data), Reset)
 
 			if(enable == false) {
 				console.log(" # Server is disabled, no response will be send")
