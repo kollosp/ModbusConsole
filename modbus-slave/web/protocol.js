@@ -99,7 +99,8 @@ let protocol = {
     parse0x3: function (buffer) {
         return {
             address: buffer[2]*0x100 + buffer[3],
-            count: buffer[4]*0x100 + buffer[5]
+            count: buffer[4]*0x100 + buffer[5],
+            used: 8
         }
     },
 
@@ -113,14 +114,15 @@ let protocol = {
         let bytes = buffer[6]
         let values = []
 
-        for(let i=7;i<buffer.length-2;i+=2)
+        for(let i=7;i<2*bytes-2;i+=2)
             values.push(buffer[i]*0x100 + buffer[i+1])
 
         return {
             address: address,
             registers: registers,
             bytes: bytes,
-            values: values
+            values: values,
+            used: 7+2*bytes
         }
     }
 }

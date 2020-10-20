@@ -9,6 +9,8 @@ let serialConfig = {
     autoOpen: false
 }
 
+let device = 2
+
 let database = {
     path: __dirname + "/db.json",
     data: {}
@@ -21,4 +23,4 @@ try{
 }
 
 //run
-require('./web/www')(serialConfig, database)
+require('./web/www')(device, serialConfig, database)

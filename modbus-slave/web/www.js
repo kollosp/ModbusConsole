@@ -9,7 +9,11 @@ let MAX_BUFFER_LENGTH = 256
 const protocol = require('./protocol')
 const fs = require('fs')
 
-module.exports = function (serialConfig, database) {
+let FgRed = "\x1b[31m"
+let FgBlue = "\x1b[34m"
+let Reset = "\x1b[0m"
+
+module.exports = function (modbusDevice, serialConfig, database) {
 
 
 	//if enable then server will be sending responses
@@ -34,11 +38,15 @@ module.exports = function (serialConfig, database) {
 	const createSerial = function () {
 		let buffer = Buffer.alloc(0)
 
-
 		//when all frame received
 		const onDataReceived = function (data) {
 
-			console.log(" # Server received (parsed):", data)
+			if(data.device != modbusDevice){
+				console.log(" # Server received data to other device: " + data.device + " modbusDevice value is: " + modbusDevice)
+				return
+			}
+
+			console.log(FgBlue + " # Server received (parsed):", JSON.stringify(data), Reset)
 
 			if(enable == false) {
 				console.log(" # Server is disabled, no response will be send")
@@ -54,7 +62,7 @@ module.exports = function (serialConfig, database) {
 		//create on data event handler
 		const onData = function (chunk) {
 			buffer = Buffer.concat([buffer, chunk]);
-			console.log(" # chunk received (raw):", chunk.toString('hex'))
+			console.log(" # chunk received (raw):", chunk.toString('hex'), " buffer: ", buffer.toString('hex'))
 
 			let bufferLength = buffer.length;
 			if (bufferLength > MAX_BUFFER_LENGTH) {
@@ -64,21 +72,23 @@ module.exports = function (serialConfig, database) {
 
 			for(let i=0;i<bufferLength;++i){
 				let unitId = buffer[i]
-				let command = buffer[i+1]
 
+				if(unitId != modbusDevice){
+					continue;
+				}
 
-
-				break;
+				if(buffer.length-i <= 7) break;
 
 				try {
-					let data = buffer
-					buffer = data.slice(-offset);
-					data = protocol.parse(data)
-					onDataReceived()
+					buffer = buffer.slice(i);
+					let data = protocol.parse(buffer)
+					buffer = buffer.slice(data.used);
+					onDataReceived(data)
 				}catch(e) {
-					//console.error(e)
-					return
+					console.error(`${FgRed}${e.message}${Reset}`)
 				}
+
+				return
 
 			}
 
@@ -92,7 +102,7 @@ module.exports = function (serialConfig, database) {
 				let key = 'v' + (parseInt(i)+data.address).toString(16)
 				if(database.data[key] != data.values[i]) {
 					database.changed = true
-					database.data[key] = {value: data.values[i], max: 0xffff, min: 0}
+					database.data[key] = {value: data.values[i] | 0, max: 0xffff, min: 0}
 				}
 
 			}
