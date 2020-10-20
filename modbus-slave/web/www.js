@@ -5,7 +5,7 @@ const Serial = require("serialport")
 const app = express()
 const path = require('path');
 const port = 3100
-
+let MAX_BUFFER_LENGTH = 256
 const protocol = require('./protocol')
 const fs = require('fs')
 
@@ -32,17 +32,11 @@ module.exports = function (serialConfig, database) {
 	app.get('/', (req, res) => res.sendFile(path.join(__dirname + '/index.html')))
 
 	const createSerial = function () {
-		//create on data event handler
-		const onData = function (data) {
+		let buffer = Buffer.alloc(0)
 
-			console.log(" # data received (raw):", data.toString('hex'))
 
-			try {
-				data = protocol.parse(data)
-			}catch(e) {
-				console.error(e)
-				return
-			}
+		//when all frame received
+		const onDataReceived = function (data) {
 
 			console.log(" # Server received (parsed):", data)
 
@@ -54,6 +48,38 @@ module.exports = function (serialConfig, database) {
 			switch (data.functionCode) {
 				case 3: response0x3(data); break;
 				case 0x10: response0x10(data); break;
+			}
+		}
+
+		//create on data event handler
+		const onData = function (chunk) {
+			buffer = Buffer.concat([buffer, chunk]);
+			console.log(" # chunk received (raw):", chunk.toString('hex'))
+
+			let bufferLength = buffer.length;
+			if (bufferLength > MAX_BUFFER_LENGTH) {
+				buffer = buffer.slice(-MAX_BUFFER_LENGTH);
+				bufferLength = MAX_BUFFER_LENGTH;
+			}
+
+			for(let i=0;i<bufferLength;++i){
+				let unitId = buffer[i]
+				let command = buffer[i+1]
+
+
+
+				break;
+
+				try {
+					let data = buffer
+					buffer = data.slice(-offset);
+					data = protocol.parse(data)
+					onDataReceived()
+				}catch(e) {
+					//console.error(e)
+					return
+				}
+
 			}
 
 
