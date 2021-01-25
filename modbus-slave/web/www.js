@@ -73,9 +73,9 @@ module.exports = function (modbusDevice, serialConfig, database) {
 			for(let i=0;i<bufferLength;++i){
 				let unitId = buffer[i]
 
-				if(unitId != modbusDevice){
+				/*if(unitId != modbusDevice){
 					continue;
-				}
+				}*/
 
 				if(buffer.length-i <= 7) break;
 
@@ -83,7 +83,9 @@ module.exports = function (modbusDevice, serialConfig, database) {
 					buffer = buffer.slice(i);
 					let data = protocol.parse(buffer)
 					buffer = buffer.slice(data.used);
-					onDataReceived(data)
+					if(unitId == modbusDevice){
+						onDataReceived(data)
+					}
 				}catch(e) {
 					console.error(`${FgRed}${e.message}${Reset}`)
 				}
